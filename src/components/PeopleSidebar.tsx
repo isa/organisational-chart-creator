@@ -33,7 +33,6 @@ export function PeopleSidebar({
 		department: "Technology",
 		country: "",
 		imageUrl: generateDefaultAvatar(),
-		rank: "",
 	});
 
 	const nameInputRef = useRef<HTMLInputElement>(null);
@@ -77,10 +76,6 @@ export function PeopleSidebar({
 			imageUrl: formData.imageUrl,
 		};
 
-		if (formData.rank) {
-			personData.rank = parseInt(formData.rank);
-		}
-
 		onAddPerson(personData);
 		setShowForm(false);
 		setFormData({
@@ -89,7 +84,6 @@ export function PeopleSidebar({
 			department: "Technology",
 			country: "",
 			imageUrl: generateDefaultAvatar(),
-			rank: "",
 		});
 	};
 
@@ -185,24 +179,6 @@ export function PeopleSidebar({
 								}
 								className="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
 							/>
-							<select
-								value={formData.rank}
-								onChange={(e) =>
-									setFormData({ ...formData, rank: e.target.value })
-								}
-								className="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm">
-								<option value="">Rank (optional)</option>
-								{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rank) => (
-									<option key={rank} value={rank}>
-										{rank} -{" "}
-										{rank === 1
-											? "Highest"
-											: rank === 10
-											? "Lowest"
-											: "Medium"}
-									</option>
-								))}
-							</select>
 						</div>
 						<div className="flex gap-2 mt-3">
 							<button
@@ -304,31 +280,6 @@ export function PeopleSidebar({
 												</span>
 											</div>
 										</div>
-									</div>
-
-									{/* Rank Selector - Bottom Right */}
-									<div className="mt-2 flex justify-end">
-										<select
-											value={person.rank || ""}
-											onChange={(e) => {
-												const rank = e.target.value
-													? parseInt(e.target.value)
-													: undefined;
-												if (rank) onUpdateRank(person.id, rank);
-											}}
-											onClick={(e) => e.stopPropagation()}
-											onMouseDown={(e) => e.stopPropagation()}
-											className="text-xs px-2 py-1 border border-slate-300 rounded bg-white hover:border-blue-400 focus:outline-none focus:border-blue-500 cursor-pointer"
-											draggable={false}>
-											<option value="">No rank</option>
-											{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(
-												(rank) => (
-													<option key={rank} value={rank}>
-														Rank {rank}
-													</option>
-												)
-											)}
-										</select>
 									</div>
 
 									{timesPlaced > 0 && (

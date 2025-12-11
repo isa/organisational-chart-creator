@@ -26,8 +26,8 @@ export function ClientSidebar({
 	const [formData, setFormData] = useState({
 		name: "",
 		domain: "",
+		logoUrl: "",
 		country: "UKI",
-		rank: "",
 	});
 
 	const nameInputRef = useRef<HTMLInputElement>(null);
@@ -48,18 +48,21 @@ export function ClientSidebar({
 		if (formData.name.trim()) {
 			const clientData: any = {
 				name: formData.name,
-				logoUrl: formData.domain
+				logoUrl: formData.logoUrl
+					? formData.logoUrl
+					: formData.domain
 					? `https://img.logo.dev/${formData.domain}?token=pk_RL23mewLR36Ib2FUEGd3lw`
 					: undefined,
 				country: formData.country || undefined,
 			};
 
-			if (formData.rank) {
-				clientData.rank = parseInt(formData.rank);
-			}
-
 			onAddClient(clientData);
-			setFormData({ name: "", domain: "", country: "UKI", rank: "" });
+			setFormData({
+				name: "",
+				domain: "",
+				logoUrl: "",
+				country: "UKI",
+			});
 			setShowForm(false);
 		}
 	};
@@ -122,6 +125,15 @@ export function ClientSidebar({
 							/>
 							<input
 								type="text"
+								value={formData.logoUrl}
+								onChange={(e) =>
+									setFormData({ ...formData, logoUrl: e.target.value })
+								}
+								placeholder="Logo URL (optional)"
+								className="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500 text-sm"
+							/>
+							<input
+								type="text"
 								value={formData.country}
 								onChange={(e) =>
 									setFormData({ ...formData, country: e.target.value })
@@ -129,24 +141,6 @@ export function ClientSidebar({
 								placeholder="Country (optional)"
 								className="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500 text-sm"
 							/>
-							<select
-								value={formData.rank}
-								onChange={(e) =>
-									setFormData({ ...formData, rank: e.target.value })
-								}
-								className="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500 text-sm">
-								<option value="">Rank (optional)</option>
-								{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rank) => (
-									<option key={rank} value={rank}>
-										{rank} -{" "}
-										{rank === 1
-											? "Highest"
-											: rank === 10
-											? "Lowest"
-											: "Medium"}
-									</option>
-								))}
-							</select>
 						</div>
 						<div className="flex gap-2 mt-3">
 							<button
@@ -225,31 +219,6 @@ export function ClientSidebar({
 														: "Client Group"}
 												</div>
 											</div>
-										</div>
-
-										{/* Rank Selector - Bottom Right */}
-										<div className="mt-2 flex justify-end">
-											<select
-												value={client.rank || ""}
-												onChange={(e) => {
-													const rank = e.target.value
-														? parseInt(e.target.value)
-														: undefined;
-													if (rank) onUpdateRank(client.id, rank);
-												}}
-												onClick={(e) => e.stopPropagation()}
-												onMouseDown={(e) => e.stopPropagation()}
-												className="text-xs px-2 py-1 border border-slate-300 rounded bg-white hover:border-emerald-400 focus:outline-none focus:border-emerald-500 cursor-pointer"
-												draggable={false}>
-												<option value="">No rank</option>
-												{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(
-													(rank) => (
-														<option key={rank} value={rank}>
-															Rank {rank}
-														</option>
-													)
-												)}
-											</select>
 										</div>
 
 										{timesPlaced > 0 && (

@@ -29,7 +29,6 @@ export interface Person {
 	country: string;
 	imageUrl?: string;
 	billable?: boolean;
-	rank?: number; // 1-10, 1 being highest
 }
 
 export interface PlacedPerson extends Person {
@@ -44,7 +43,6 @@ export interface Client {
 	name: string;
 	logoUrl?: string;
 	country?: string;
-	rank?: number; // 1-10, 1 being highest
 }
 
 export interface PlacedClient {
@@ -56,7 +54,6 @@ export interface PlacedClient {
 	y: number;
 	peopleIds: string[]; // Max 3 people
 	instanceId: string; // Unique instance ID for each placed client
-	rank?: number; // 1-10, 1 being highest
 }
 
 export interface Connection {
@@ -492,9 +489,8 @@ export function OrgChartCanvas() {
 			x: client.x,
 			y: client.y,
 			parentClientId: clientInstanceId,
-			// Preserve billability and rank from existing placed instance if available
+			// Preserve billability from existing placed instance if available
 			billable: existingPlacedPerson?.billable ?? person.billable,
-			rank: existingPlacedPerson?.rank ?? person.rank,
 		};
 
 		setPlacedPeople((prev) => {
@@ -894,36 +890,25 @@ export function OrgChartCanvas() {
 						childId = fromId;
 					}
 				} else {
-					// 2. No clear visual hierarchy (side-by-side or overlapping) -> Check Ranks
-					const fromRank = fromItem.rank ?? 999;
-					const toRank = toItem.rank ?? 999;
-
-					if (fromRank < toRank) {
-						parentId = fromId;
-						childId = toId;
-					} else if (toRank < fromRank) {
-						parentId = toId;
-						childId = fromId;
-					} else {
-						// 3. Equal Ranks -> Fallback to Connection Direction (Source -> Target)
-						parentId = fromId;
-						childId = toId;
-					}
+					// 2. No clear visual hierarchy (side-by-side or overlapping) -> Fallback to Connection Direction
+					// If From -> To, assume From is Parent
+					parentId = fromId;
+					childId = toId;
 				}
 
 				// Strict Tree Rule:
 				// A child should ideally have only ONE parent for layout purposes.
-				// If multiple parents claim a child, we pick the one with the best rank (lowest number).
+				// If multiple parents claim a child, we pick the one that is visually higher (smaller Y).
 				const existingParents = parentsMap.get(childId) || [];
 				if (existingParents.length > 0) {
 					// Compare with existing parent
 					const currentParentId = existingParents[0];
 					const currentParent = nodeMap.get(currentParentId);
-					const currentParentRank = currentParent?.rank ?? 999;
-					const newParentRank = nodeMap.get(parentId)?.rank ?? 999;
+					const currentParentY = currentParent?.y ?? 9999;
+					const newParentY = nodeMap.get(parentId)?.y ?? 9999;
 
-					if (newParentRank < currentParentRank) {
-						// New parent is better (higher rank), replace old parent
+					if (newParentY < currentParentY) {
+						// New parent is better (visually higher), replace old parent
 						// Remove child from old parent's list
 						const oldParentChildren =
 							childrenMap.get(currentParentId) || [];
@@ -951,10 +936,10 @@ export function OrgChartCanvas() {
 			return parents.length === 0;
 		});
 
-		// Fallback: If no roots found (cycle?), pick the one with lowest rank (min value)
+		// Fallback: If no roots found (cycle?), pick the one with smallest Y coordinate
 		if (roots.length === 0 && allItems.length > 0) {
-			const minRank = Math.min(...allItems.map((i) => i.rank ?? 999));
-			roots = allItems.filter((i) => (i.rank ?? 999) === minRank);
+			const minY = Math.min(...allItems.map((i) => i.y));
+			roots = allItems.filter((i) => Math.abs(i.y - minY) < 10);
 		}
 
 		// 3. Tree Layout Algorithm
