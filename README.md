@@ -1,4 +1,4 @@
-# Premium Org Chart Builder
+# Org Chart Builder
 
 ![App Screenshot](./shot.png)
 
