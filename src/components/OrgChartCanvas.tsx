@@ -448,20 +448,29 @@ export function OrgChartCanvas() {
 	};
 
 	const handleRemoveClient = (instanceId: string) => {
+		// Identify people inside this client to remove connections
+		const peopleToRemove = placedPeople
+			.filter((p) => p.parentClientId === instanceId)
+			.map((p) => p.instanceId);
+
 		// Remove people from this client
 		setPlacedPeople((prev) =>
-			prev.map((person) =>
-				person.parentClientId === instanceId
-					? { ...person, parentClientId: undefined }
-					: person
-			)
+			prev.filter((person) => person.parentClientId !== instanceId)
 		);
 
 		setPlacedClients((prev) =>
 			prev.filter((c) => c.instanceId !== instanceId)
 		);
+
+		// Remove connections for client AND removed people
 		setConnections((prev) =>
-			prev.filter((c) => c.fromId !== instanceId && c.toId !== instanceId)
+			prev.filter(
+				(c) =>
+					c.fromId !== instanceId &&
+					c.toId !== instanceId &&
+					!peopleToRemove.includes(c.fromId) &&
+					!peopleToRemove.includes(c.toId)
+			)
 		);
 	};
 
