@@ -1321,13 +1321,14 @@ export function OrgChartCanvas() {
 
 			const padding = 20;
 			const paddingTop = 80; // Extra space for title and delete button
+			const paddingBottom = 60; // Extra space at bottom
 
 			return {
 				...group,
 				x: minX - padding,
 				y: minY - paddingTop,
 				width: maxX - minX + padding * 2,
-				height: maxY - minY + paddingTop + padding,
+				height: maxY - minY + paddingTop + paddingBottom,
 			};
 		})
 		.filter((g): g is NonNullable<typeof g> => g !== null);
